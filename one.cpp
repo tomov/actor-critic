@@ -24,6 +24,10 @@ struct transition_t
     // learning variables
     double H;
     double policy;
+
+    // record
+    double delta_avg;
+    int times;
 };
 
 enum state_type_t {CHOICE, PROBABILISTIC};
@@ -44,7 +48,7 @@ struct state_t
 state_t state[MAXN];
 
 // learning params
-double eta = 0.1; // critic learning rate
+double eta = 0.05; // critic learning rate
 double alpha = 0.05; // actor learning rate
 double discount = 0.99;   // discount
 double beta = 0.01; // softmax temperature
@@ -185,11 +189,11 @@ void print()
             state_t &Snew = state[trans.to];
             if (S.type == CHOICE)
             {
-                cout<<"                                                      "<<trans.name<<" (action) to "<<Snew.name<<" (H = "<<trans.H<<", policy = "<<trans.policy<<")\n";
+                cout<<"                                                      "<<trans.name<<" (action) to "<<Snew.name<<" (H = "<<trans.H<<", policy = "<<trans.policy<<", chosen "<<trans.times<<" times, PE = "<<trans.delta_avg<<")\n";
             }
             else
             {
-                cout<<"                                                      "<<trans.name<<" (prob) to "<<Snew.name<<" (H = "<<trans.H<<", prob = "<<trans.prob<<")\n";
+                cout<<"                                                      "<<trans.name<<" (prob) to "<<Snew.name<<" (H = "<<trans.H<<", prob = "<<trans.prob<<", chosen "<<trans.times<<" times, PE = "<<trans.delta_avg<<")\n";
             }
         }
     }
@@ -200,6 +204,9 @@ void trial(bool do_print)
     int idx = 0;
     if (do_print) cout<<"\n  ---------------------- TRIAL --------------\n\n";
     int count = 0;
+    double bias = 0;
+    double delta_prev = 0;
+    double delta_prevprev = 0;
     while (true)
     {
         state_t &S = state[idx];
@@ -218,9 +225,15 @@ void trial(bool do_print)
         trans.H += alpha * delta;
         get_policy(S);
 
+        double add_what = delta + delta_prev + delta_prevprev + bias;
+        trans.delta_avg = (trans.delta_avg * trans.times + add_what) / (trans.times + 1);
+        trans.times++;
+
         if (do_print) cout<<" from "<<S.name<<", "<<trans.name<<" --> "<<Snew.name<<", PE = "<<delta<<"\n";
 
         idx = trans.to;
+        delta_prevprev = delta_prev;
+        delta_prev = delta;
     }
 
     if (do_print) cout<<"\n";
@@ -229,9 +242,9 @@ void trial(bool do_print)
 
 void learn()
 {
-    for (int iter = 0; iter < 3000; iter++)
+    for (int iter = 0; iter < 300000; iter++)
     {
-        trial(true);
+        trial(false);
     }
 }
 

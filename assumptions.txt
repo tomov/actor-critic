@@ -1,0 +1,16 @@
+
+
+from TD, you can (and should) add states between other states -- time is discrete small steps, it makes sense
+
+you do probability matching for actor-critic (softmax converges too quickly or too slowly... it's too volatile and subject to small fluctuations.. I don't like it)
+
+you can sum TD errors between states that could in practice occur almost instantenaously (e.g. PE = PE1 + PE2 + PE3)
+
+the composite states are completely different states.
+
+The reward-states are the same between decision and reference trials (TODO add different reward state for decision trials and see what happens)
+
+the monkey can mentalize -- in preparing to execute an action, its dopamine neurons act as if it already executed it
+=> can sum PE's of consecutive states that do not have randomization between them
+
+
