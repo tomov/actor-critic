@@ -13,17 +13,35 @@ const int MAXN = 1024;
 
 // input
 int N;
-vector<int> adj[MAXN];
-double reward[MAXN];
 
-// learning variables
-double V[MAXN];
-vector<double> policy[MAXN];
-vector<double> H[MAXN];
+struct transition_t
+{
+    int from;
+    int to;
+    string name;
+    double prob; // 1 for actions
 
-// for visualization
-vector<string> actions[MAXN];
-string states[MAXN];
+    // learning variables
+    double H;
+    double policy;
+};
+
+enum state_type_t {CHOICE, PROBABILISTIC};
+
+struct state_t
+{
+    // input variables
+    int idx;
+    string name;
+    state_type_t type;
+    double R;
+    vector<transition_t> next;
+
+    // learning variables
+    double V;
+};
+
+state_t state[MAXN];
 
 // learning params
 double eta = 0.1; // critic learning rate
@@ -35,25 +53,25 @@ double min_R = 1; // minimum reward for probability matching
 enum method_t {SOFTMAX, MATCHING_NOT_WORKING, MATCHING};
 method_t method = MATCHING;
 
-double get_action_weight(int state, int action)
+double get_action_weight(state_t &S, int i)
 {
+    transition_t &trans = S.next[i];
     switch(method)
     {
         case SOFTMAX:
         {
-            return exp(beta * H[state][action]);
+            return exp(beta * trans.H);
         }
         break;
         case MATCHING_NOT_WORKING:
         {
-            return max(H[state][action], min_R);
+            return max(trans.H, min_R);
         }
         break;
         case MATCHING:
         {
-            int next = adj[state][action];
-            double value = V[next];
-            return max(value, min_R);
+            state_t &Snew = state[trans.to];
+            return max(Snew.V, min_R);
         }
         break;
         default:
@@ -63,56 +81,86 @@ double get_action_weight(int state, int action)
     }
 }
 
-void get_policy(int state)
+void get_policy(state_t &S)
 {
-    double total = 0;
-    for (int i = 0; i < adj[state].size(); i++)
+    if (S.type != CHOICE)
     {
-        double weight = get_action_weight(state, i);
-        policy[state][i] = weight;
+        // there is no policy for non-choice transitions (i.e. non-actions)
+        return;
+    }
+    double total = 0;
+    for (int i = 0; i < S.next.size(); i++)
+    {
+        double weight = get_action_weight(S, i);
+        S.next[i].policy = weight;
         total += weight;
     }
-    for (int i = 0; i < adj[state].size(); i++)
+    for (int i = 0; i < S.next.size(); i++)
     {
-        policy[state][i] /= total;
+        S.next[i].policy /= total;
     }
 }
 
-int pick_action(int state)
+int pick_next(state_t &S)
 {
     double r = (double)rand() / RAND_MAX;
     double tot = 0;
-    for (int i = 0; i < policy[state].size(); i++)
+    for (int i = 0; i < S.next.size(); i++)
     {
-        tot += policy[state][i];
+        transition_t &trans = S.next[i];
+        if (S.type == CHOICE)
+        {
+            tot += trans.policy;
+        }
+        else
+        {
+            tot += trans.prob;
+        }
         if (tot >= r)
         {
             return i;
         }
     }
-    return -1; // no action available -- terminal state
+    return -1; // no transition available -- terminal state
 }
 
 void read()
 {
     cin>>N;
+    string type;
     for (int i = 0; i < N; i++)
     {
-        cin>>reward[i]>>states[i];
+        state_t &S = state[i];
+        S.idx = i;
+        cin>>S.R>>S.name>>type;
+        if (type[0] == 'C')
+        {
+            S.type = CHOICE;
+        }
+        else
+        {
+            S.type = PROBABILISTIC;
+        }
     }
-    int a, b;
-    string s;
-    while (cin>>a>>b)
+    transition_t trans;
+    while (cin>>trans.from>>trans.to>>trans.name)
     {
-        getline(cin, s);
-        actions[a].push_back(s);
-        adj[a].push_back(b);
-        H[a].push_back(0); // Softmax
-        policy[a].push_back(0);
+        state_t &S = state[trans.from];
+        if (S.type == CHOICE)
+        {
+            trans.prob = 1; // actions are deterministic
+        }
+        else
+        {
+            cin>>trans.prob;
+        }
+        trans.H = 0;
+        trans.policy = 0;
+        S.next.push_back(trans);
     }
     for (int i = 0; i < N; i++)
     {
-        get_policy(i);
+        get_policy(state[i]);
     }
 }
 
@@ -120,39 +168,50 @@ void print()
 {
     for (int i = 0; i < N; i++)
     {
-        cout<<"From "<<states[i]<<" (R = $"<<reward[i]<<", V = "<<V[i]<<") to:\n";
-        for (int j = 0; j < adj[i].size(); j++)
+        state_t &S = state[i];
+        cout<<"From "<<S.name<<" (R = $"<<S.R<<", V = "<<S.V<<") to:\n";
+        for (int j = 0; j < S.next.size(); j++)
         {
-            int next = adj[i][j];
-            cout<<"                                                       "<<states[next]<<":"<<actions[i][j]<<" (H = "<<H[i][j]<<", prob = "<<policy[i][j]<<")\n";
+            transition_t &trans = S.next[j];
+            state_t &Snew = state[trans.to];
+            if (S.type == CHOICE)
+            {
+                cout<<"                                                      ACTION "<<trans.name<<" to "<<Snew.name<<" (H = "<<trans.H<<", policy = "<<trans.policy<<")\n";
+            }
+            else
+            {
+                cout<<"                                                      PROBABILISTIC "<<trans.name<<" to "<<Snew.name<<" (H = "<<trans.H<<", prob = "<<trans.prob<<")\n";
+            }
         }
     }
 }
 
 void trial()
 {
-    int S = 0;
+    int idx = 0;
     cout<<"\n  ---------------------- TRIAL --------------\n\n";
     int count = 0;
     while (true)
     {
-        int a = pick_action(S);
+        state_t &S = state[idx];
+        int a = pick_next(S);
         if (a == -1)
         {
             break;
         }
-        int Snew = adj[S][a];
+        transition_t &trans = S.next[a];
+        state_t &Snew = state[trans.to];
 
-        double R = reward[Snew];
-        double delta = R + discount * V[Snew] - V[S];
-        V[S] += eta * delta;
+        double R = Snew.R;
+        double delta = R + discount * Snew.V - S.V;
+        S.V += eta * delta;
 
-        H[S][a] += alpha * delta;
+        trans.H += alpha * delta;
         get_policy(S);
 
-        cout<<" from "<<states[S]<<","<<actions[S][a]<<" --> "<<states[Snew]<<", PE = "<<delta<<"\n";
+        cout<<" from "<<S.name<<", "<<trans.name<<" --> "<<Snew.name<<", PE = "<<delta<<"\n";
 
-        S = Snew;
+        idx = trans.to;
     }
 
     cout<<"\n";
@@ -161,7 +220,7 @@ void trial()
 
 void learn()
 {
-    for (int iter = 0; iter < 3000; iter++)
+    for (int iter = 0; iter < 300; iter++)
     {
         trial();
     }

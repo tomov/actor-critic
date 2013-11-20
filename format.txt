@@ -1,0 +1,9 @@
+N = number of states
+
+N lines 0..N-1, each in the format:
+R name type
+where R = reward for state i, name = name of state i, type = Probabilistic or Choice, meaning that at this state, the animal either has to make a choice between future states, or it needs to passively wait while the trial picks the next state probabilistically.
+
+the next lines are in the format:
+s1 s2 name (prob)
+Each line describes an transition from state s1 to state s2 with name name. If s1 is a state with type = Probabilistic, then the prob parameter must also be included. It says what is the probability that this transition will happen. The sum of these for every s1 must be 1.
