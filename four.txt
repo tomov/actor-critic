@@ -1,0 +1,168 @@
+39
+
+0   pre-start          Choice
+0   started            Probabilistic
+100 juice              Probabilistic
+0   no-juice           Probabilistic
+0   end                Probabilistic
+
+0   cue-A              Probabilistic
+0   go-A!              Choice
+0   reward-A           Probabilistic
+
+0   cue-B              Probabilistic
+0   go-B!              Choice
+0   reward-B           Probabilistic
+
+0   cue-C              Probabilistic
+0   go-C!              Choice
+0   reward-C           Probabilistic
+
+0   cue-D              Probabilistic
+0   go-D!              Choice
+0   reward-D           Probabilistic
+
+
+
+0   reference-trial    Probabilistic
+0   decision-trial     Probabilistic
+
+0   cue-AA             Probabilistic
+0   go-AA!             Choice
+
+0   cue-AB             Probabilistic
+0   go-AB!             Choice
+
+0   cue-AC             Probabilistic
+0   go-AC!             Choice
+
+0   cue-AD             Probabilistic
+0   go-AD!             Choice
+
+0   cue-BB             Probabilistic
+0   go-BB!             Choice
+
+0   cue-BC             Probabilistic
+0   go-BC!             Choice
+
+0   cue-BD             Probabilistic
+0   go-BD!             Choice
+
+0   cue-CC             Probabilistic
+0   go-CC!             Choice
+
+0   cue-CD             Probabilistic
+0   go-CD!             Choice
+
+0   cue-DD             Probabilistic
+0   go-DD!             Choice
+
+
+
+
+
+
+
+
+
+
+
+
+
+0 1 press-middle-button
+0 4 no-action
+2 4 finish         1
+3 4 finish         1
+
+17 5 get-cue-A      0.25
+5 6 wait           1
+6 7 correct
+6 4 incorrect
+7 2 get-juice      0.25
+7 3 get-no-juice   0.75
+
+17 8 get-cue-B      0.25
+8 9 wait           1
+9 10 correct
+9 4 incorrect
+10 2 get-juice     0.50
+10 3 get-no-juice  0.50
+
+17 11 get-cue-C      0.25
+11 12 wait           1
+12 13 correct
+12 4 incorrect
+13 2 get-juice      0.75
+13 3 get-no-juice   0.25
+
+17 14 get-cue-D      0.25
+14 15 wait           1
+15 16 correct
+15 4 incorrect
+16 2 get-juice      1.00
+16 3 get-no-juice   0.00
+
+
+
+1 17 ref-trial       0.9
+1 18 decision-trial  0.1
+
+18 19 get-cue-AA     0.1
+19 20 wait           1
+20 7  pick-A
+20 7  pick-A
+
+18 21 get-cue-AB     0.1
+21 22 wait           1
+22 7  pick-A
+22 10 pick-B
+
+18 23 get-cue-AC     0.1
+23 24 wait           1
+24 7  pick-A
+24 13 pick-C
+
+18 25 get-cue-AD     0.1
+25 26 wait           1
+26 7  pick-A
+26 16 pick-D
+
+18 27 get-cue-BB     0.1
+27 28 wait           1
+28 10 pick-B
+28 10 pick-B
+
+18 29 get-cue-BC     0.1
+29 30 wait           1
+30 10 pick-B
+30 13 pick-C
+
+18 31 get-cue-BD     0.1
+31 32 wait           1
+32 10 pick-B
+32 16 pick-D
+
+18 33 get-cue-CC     0.1
+33 34 wait           1
+34 13 pick-C
+34 13 pick-C
+
+18 35 get-cue-CD     0.1
+35 36 wait           1
+36 13 pick-C
+36 16 pick-D
+
+18 37 get-cue-DD     0.1
+37 38 wait           1
+38 16 pick-D
+38 16 pick-D
+
+
+
+
+
+
+
+
+
+
