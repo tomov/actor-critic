@@ -1,0 +1,60 @@
+17
+
+0   pre-start          Choice
+0   started            Probabilistic
+100 juice              Probabilistic
+0   no-juice           Probabilistic
+0   end                Probabilistic
+
+0   cue-A              Probabilistic
+0   go-A!              Choice
+0   reward-A           Probabilistic
+
+0   cue-B              Probabilistic
+0   go-B!              Choice
+0   reward-B           Probabilistic
+
+0   cue-C              Probabilistic
+0   go-C!              Choice
+0   reward-C           Probabilistic
+
+0   cue-D              Probabilistic
+0   go-D!              Choice
+0   reward-D           Probabilistic
+
+
+
+0 1 press-middle-button
+0 4 no-action
+2 4 finish         1
+3 4 finish         1
+
+1 5 get-cue-A      0.25
+5 6 wait           1
+6 7 correct
+6 4 incorrect
+7 2 get-juice      0.25
+7 3 get-no-juice   0.75
+
+1 8 get-cue-B      0.25
+8 9 wait           1
+9 10 correct
+9 4 incorrect
+10 2 get-juice     0.50
+10 3 get-no-juice  0.50
+
+1 11 get-cue-C      0.25
+11 12 wait           1
+12 13 correct
+12 4 incorrect
+13 2 get-juice      0.75
+13 3 get-no-juice   0.25
+
+1 14 get-cue-D      0.25
+14 15 wait           1
+15 16 correct
+15 4 incorrect
+16 2 get-juice      1.00
+16 3 get-no-juice   0.00
+
+

@@ -169,27 +169,36 @@ void print()
     for (int i = 0; i < N; i++)
     {
         state_t &S = state[i];
-        cout<<"From "<<S.name<<" (R = $"<<S.R<<", V = "<<S.V<<") to:\n";
+        string type;
+        if (S.type == CHOICE)
+        {
+            type = "choice";
+        }
+        else
+        {
+            type = "probabilistic";
+        }
+        cout<<"From "<<S.name<<" (R = $"<<S.R<<", V = "<<S.V<<") -- "<<type<<":\n";
         for (int j = 0; j < S.next.size(); j++)
         {
             transition_t &trans = S.next[j];
             state_t &Snew = state[trans.to];
             if (S.type == CHOICE)
             {
-                cout<<"                                                      ACTION "<<trans.name<<" to "<<Snew.name<<" (H = "<<trans.H<<", policy = "<<trans.policy<<")\n";
+                cout<<"                                                      "<<trans.name<<" (action) to "<<Snew.name<<" (H = "<<trans.H<<", policy = "<<trans.policy<<")\n";
             }
             else
             {
-                cout<<"                                                      PROBABILISTIC "<<trans.name<<" to "<<Snew.name<<" (H = "<<trans.H<<", prob = "<<trans.prob<<")\n";
+                cout<<"                                                      "<<trans.name<<" (prob) to "<<Snew.name<<" (H = "<<trans.H<<", prob = "<<trans.prob<<")\n";
             }
         }
     }
 }
 
-void trial()
+void trial(bool do_print)
 {
     int idx = 0;
-    cout<<"\n  ---------------------- TRIAL --------------\n\n";
+    if (do_print) cout<<"\n  ---------------------- TRIAL --------------\n\n";
     int count = 0;
     while (true)
     {
@@ -209,20 +218,20 @@ void trial()
         trans.H += alpha * delta;
         get_policy(S);
 
-        cout<<" from "<<S.name<<", "<<trans.name<<" --> "<<Snew.name<<", PE = "<<delta<<"\n";
+        if (do_print) cout<<" from "<<S.name<<", "<<trans.name<<" --> "<<Snew.name<<", PE = "<<delta<<"\n";
 
         idx = trans.to;
     }
 
-    cout<<"\n";
-    print();
+    if (do_print) cout<<"\n";
+    if (do_print) print();
 }
 
 void learn()
 {
-    for (int iter = 0; iter < 300; iter++)
+    for (int iter = 0; iter < 3000; iter++)
     {
-        trial();
+        trial(true);
     }
 }
 
@@ -231,9 +240,11 @@ int main()
     srand(123);
 
     read();
-    print();
 
     learn();
+
+    cout<<" \n\n        -------------------- FINAL VALUES AND POLICY --------------- \n\n\n";
+    print();
     
     return 0;
 }
