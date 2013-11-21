@@ -1,0 +1,9 @@
+finish figures for this guy
+
+have separate left-right
+
+add noise
+
+get confidence bars (std err?)
+
+SARSA
