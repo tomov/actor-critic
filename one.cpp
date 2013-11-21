@@ -328,6 +328,7 @@ void print_2a(bool matlab = true)
     for (char cue_id = 'A'; cue_id <= 'D'; cue_id++)
     {
         double R = (double)cue[cue_id].rewarded / cue[cue_id].seen;
+        R *= 100; // TODO HARDCODED
         if (!matlab) cout<<"  cue "<<cue_id<<" rewarded "<<cue[cue_id].rewarded<<" out of "<<cue[cue_id].seen<<" times = "<<R<<"\n";
         if (matlab) cout<<R<<", "<<R<<"; ";
     }
@@ -574,6 +575,91 @@ void print_4ab(bool matlab = true)
 }
 
 
+void print_4c(bool matlab = true)
+{
+    cout<<"\n %% ---- figure 4c ---- \n\n";
+
+    vector<double> xs_ref, ys_ref;
+    for (char cue_id = 'A'; cue_id <= 'D'; cue_id++)
+    {
+        double R = (double)cue[cue_id].rewarded / cue[cue_id].seen;
+        xs_ref.push_back(R * 100); // TODO HARDCODED
+        state_t &S = state[cue[cue_id].state_idx]; 
+        transition_t &trans = S.next[0];
+        ys_ref.push_back(trans.delta_avg);
+    }
+
+    vector<double> xs_dec, ys_dec;
+    for (char cue_id = 'A'; cue_id <= 'D'; cue_id++)
+    {
+        xs_dec.push_back(cue[cue_id].exp_reward_hardcoded);
+        double delta_avg = 0;
+        int count = 0;
+        for (int i = 0; i < N; i++)
+        {
+            state_t &S = state[i];
+            if (S.name.length() == 5 && S.name.substr(0, 2) == "go")
+            {
+                char low_cue_id = S.name[3];
+                transition_t &low_trans = S.next[0];
+                if (low_cue_id == cue_id)
+                {
+                    count++;
+                    delta_avg += low_trans.delta_avg;
+                }
+
+                char high_cue_id = S.name[4];
+                transition_t &high_trans = S.next[1];
+                if (high_cue_id == cue_id)
+                {
+                    count++;
+                    delta_avg += high_trans.delta_avg;
+                }
+            }
+        }
+        delta_avg /= count;
+        ys_dec.push_back(delta_avg);
+    }
+
+    if (matlab)
+    {
+        cout<<"xs_ref = [";
+        for (int i = 0; i < xs_ref.size(); i++)
+        {
+            cout<<xs_ref[i]<<", ";
+        }
+        cout<<"]\n";
+        cout<<"ys_ref = [";
+        for (int i = 0; i < ys_ref.size(); i++)
+        {
+            cout<<ys_ref[i]<<", ";
+        }
+        cout<<"]\n";
+        cout<<"xs_dec = [";
+        for (int i = 0; i < xs_dec.size(); i++)
+        {
+            cout<<xs_dec[i]<<", ";
+        }
+        cout<<"]\n";
+        cout<<"ys_dec = [";
+        for (int i = 0; i < ys_dec.size(); i++)
+        {
+            cout<<ys_dec[i]<<", ";
+        }
+        cout<<"]\n";
+        cout<<"subplot(3, 2, 5);\n";
+        cout<<"scatter([xs_ref xs_dec], [ys_ref ys_dec]);\n";
+        cout<<"lsline;\n";
+        cout<<"hold on;\n";
+        cout<<"scatter(xs_dec, ys_dec, 'fill', 'blue');\n";
+        cout<<"hold off;\n";
+        cout<<"xlabel('Action value');\n";
+        cout<<"ylabel('PE ~ DA response');\n";
+    }
+    cout<<"\n";
+}
+
+
 int main()
 {
     srand(123);
@@ -591,7 +677,7 @@ int main()
     print_2d();
 
     print_4ab();
-
+    print_4c();
     
     return 0;
 }
