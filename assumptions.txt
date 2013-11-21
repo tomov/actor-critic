@@ -13,4 +13,4 @@ The reward-states are the same between decision and reference trials (TODO add d
 the monkey can mentalize -- in preparing to execute an action, its dopamine neurons act as if it already executed it
 => can sum PE's of consecutive states that do not have randomization between them
 
-
+left and right doesn't matter (TODO it does -- add different cases or that)

@@ -7,19 +7,19 @@
 0   end                Probabilistic
 
 0   cue-A              Probabilistic
-0   go-A!              Choice
+0   go-A               Choice
 0   reward-A           Probabilistic
 
 0   cue-B              Probabilistic
-0   go-B!              Choice
+0   go-B               Choice
 0   reward-B           Probabilistic
 
 0   cue-C              Probabilistic
-0   go-C!              Choice
+0   go-C               Choice
 0   reward-C           Probabilistic
 
 0   cue-D              Probabilistic
-0   go-D!              Choice
+0   go-D               Choice
 0   reward-D           Probabilistic
 
 
@@ -28,34 +28,34 @@
 0   decision-trial     Probabilistic
 
 0   cue-AA             Probabilistic
-0   go-AA!             Choice
+0   go-AA              Choice
 
 0   cue-AB             Probabilistic
-0   go-AB!             Choice
+0   go-AB              Choice
 
 0   cue-AC             Probabilistic
-0   go-AC!             Choice
+0   go-AC              Choice
 
 0   cue-AD             Probabilistic
-0   go-AD!             Choice
+0   go-AD              Choice
 
 0   cue-BB             Probabilistic
-0   go-BB!             Choice
+0   go-BB              Choice
 
 0   cue-BC             Probabilistic
-0   go-BC!             Choice
+0   go-BC              Choice
 
 0   cue-BD             Probabilistic
-0   go-BD!             Choice
+0   go-BD              Choice
 
 0   cue-CC             Probabilistic
-0   go-CC!             Choice
+0   go-CC              Choice
 
 0   cue-CD             Probabilistic
-0   go-CD!             Choice
+0   go-CD              Choice
 
 0   cue-DD             Probabilistic
-0   go-DD!             Choice
+0   go-DD              Choice
 
 
 
