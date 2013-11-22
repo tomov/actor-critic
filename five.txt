@@ -1,0 +1,67 @@
+14
+
+25        25
+50        50
+75        75
+100       100
+25-25     25
+25-50     37.5
+25-75     50
+25-100    62.5
+50-50     50
+50-75     62.5
+50-100    75
+75-75     75
+75-100    87.5
+100-100   100
+
+17
+
+start              0    probabilistic   no-cue
+reference-trial    0    probabilistic   no-cue
+cue-25             0    probabilistic   25
+cue-50             0    probabilistic   50
+cue-75             0    probabilistic   75
+cue-100            0    probabilistic   100
+go-25              0    DETERMINISTIC   no-cue
+go-50              0    DETERMINISTIC   no-cue
+go-75              0    DETERMINISTIC   no-cue
+go-100             0    DETERMINISTIC   no-cue
+reward-25          0    probabilistic   no-cue
+reward-50          0    probabilistic   no-cue
+reward-75          0    probabilistic   no-cue
+reward-100         0    probabilistic   no-cue
+get-juice        100    probabilistic   no-cue
+get-no-juice       0    probabilistic   no-cue
+end                0    probabilistic   no-cue
+
+
+
+start              reference-trial      1
+reference-trial    cue-25               0.25
+reference-trial    cue-50               0.25
+reference-trial    cue-75               0.25
+reference-trial    cue-100              0.25
+cue-25             go-25                1
+cue-50             go-50                1
+cue-75             go-75                1
+cue-100            go-100               1
+go-25              reward-25            correct
+go-25              end                  incorrect
+go-50              reward-50            correct
+go-50              end                  incorrect
+go-75              reward-75            correct
+go-75              end                  incorrect
+go-100             reward-100           correct
+go-100             end                  incorrect
+reward-25          get-juice            0.25
+reward-25          get-no-juice         0.75
+reward-50          get-juice            0.5
+reward-50          get-no-juice         0.5
+reward-75          get-juice            0.75
+reward-75          get-no-juice         0.25
+reward-100         get-juice            1
+reward-100         get-no-juice         0
+get-juice          end                  1
+get-no-juice       end                  1
+
