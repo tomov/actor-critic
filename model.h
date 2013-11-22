@@ -1,15 +1,8 @@
 #include <iostream>
-#include <fstream>
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
 #include <cstring>
-#include <cstring>
-#include <cmath>
-#include <functional>
-#include <numeric>
-#include <algorithm>
-#include <utility>
 #include <map>
 #include <sstream>
 
@@ -282,13 +275,3 @@ public:
 };
 
 
-
-int main()
-{
-    ExperimentalModel model;
-
-    model.read();
-    model.print();
-
-    return 0;
-}

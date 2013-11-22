@@ -1,13 +1,24 @@
+C = number of cues
+
+C lines, each line in the format:
+cue_name    cue_value
+
 N = number of states
+N lines, each line in the format:
+state_name      state_reward      state_type    state_cue
 
-N lines 0..N-1, each in the format:
-R name type
-where R = reward for state i, name = name of state i, type = Probabilistic or Choice, meaning that at this state, the animal either has to make a choice between future states, or it needs to passively wait while the trial picks the next state probabilistically.
+where state_type = Deterministic or Probabilistic, and state_cue is either a cue_name from the previous list, or a non-existing cue name for non-cue states
 
-the next lines are in the format:
-s1 s2 name (prob)
-Each line describes an transition from state s1 to state s2 with name name. If s1 is a state with type = Probabilistic, then the prob parameter must also be included. It says what is the probability that this transition will happen. The sum of these for every s1 must be 1.
+the next lines denote the transitions, each in the format:
+from_state      to_state      probability | action_name
 
+where from_state and to_state are state_names from the previous list. If the state_type of the from_state is Probabilistic, the third parameter is the probability of the transition. Otherwise, it is the action_name of the action.
+
+
+
+
+
+//////// RETRO /////////////
 
 by convention, cue states are named in the format "cue-X", where X is a single letter corresponding to the cue identifier. For each X, there can only be one "cue-X" state
 
