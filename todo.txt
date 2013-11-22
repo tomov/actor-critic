@@ -1,5 +1,3 @@
-finish figures for this guy
-
 have separate left-right
 
 add noise
