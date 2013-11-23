@@ -530,7 +530,47 @@ public:
             }
             y.push_back(ss.str());
         }
-        PrintFigure<string, string>("4b", 3, 2, 3, "bar", x, y, "State (pair)", "PE ~ Dopamine response", "legend('low', 'high');\n");
+        PrintFigure<string, string>("4b", 3, 2, 3, "bar", x, y, "State (pair)", "PE ~ Dopamine response", "legend('high', 'low');\n");
+    }
+
+    void Figure4c()
+    {
+        vector<double> x, y;
+        // reference trials
+        for (int i = 0; i < 4; i++)
+        {
+            Cue *cue = ac->model->cues[i];
+            x.push_back(ac->cue_extras[cue].reward_avg);
+            y.push_back(GetAveragePE(cue));
+        }
+
+        // decision trials
+        for (int i = 0; i < 4; i++)
+        {
+            Cue *cue = ac->model->cues[i];
+            double PE_avg = 0;
+            int total = 0;
+            for (int j = 0; j < ac->model->transitions.size(); j++)
+            {
+                Transition* trans = ac->model->transitions[j];
+                // if it's an action in a decision trial
+                if (ac->model->cue_from_name.find(trans->to->extra) != ac->model->cue_from_name.end())
+                {
+                    Cue* ref_cue = ac->model->cue_from_name[trans->to->extra];
+                    // that corresponds to the same reference cue
+                    if (ref_cue == cue)
+                    {
+                        PE_avg += ac->transition_extras[trans].PE_avg;
+                        total++;
+                    }
+                }
+            }
+            PE_avg /= total;
+            x.push_back(cue->value);
+            y.push_back(PE_avg + bias);
+        }
+
+        PrintFigure<double, double>("4c", 3, 2, 5, "scatter", x, y, "Action value", "PE ~ Dopamine response", "lsline;\nhold on;\nscatter(x_4c(5:end), y_4c(5:end), 'fill', 'blue');\nhold off;\n");
     }
 
 };
@@ -567,6 +607,7 @@ int main()
     cout<<"figure;\n";
     morris.Figure4a();
     morris.Figure4b();
+    morris.Figure4c();
 
     return 0;
 }
