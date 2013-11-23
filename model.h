@@ -68,7 +68,7 @@ public:
         to(NULL)
     { }
 
-    virtual string get_extra() = 0;
+    virtual string GetExtraString() = 0;
 };
 
 
@@ -82,7 +82,7 @@ public:
         probability(0)
     { }
 
-    string get_extra()
+    string GetExtraString()
     {
        ostringstream ss;
        ss<<"prob = "<<probability;
@@ -101,7 +101,7 @@ public:
         name("")
     { }
 
-    string get_extra()
+    string GetExtraString()
     {
         ostringstream ss;
         ss<<"ACTION: "<<name;
@@ -124,7 +124,7 @@ public:
     State* start;
     State* end;
 
-    void read()
+    void Read()
     {
         int C;
         cin>>C;
@@ -223,7 +223,7 @@ public:
     }
 
 
-    void print()
+    void Print()
     {
         cout<<" Cues:\n";
         for (int i = 0; i < cues.size(); i++)
@@ -244,7 +244,7 @@ public:
             for (int j = 0; j < state->out.size(); j++)
             {
                 Transition* trans = state->out[j];
-                cout<<"                                                               "<<trans->from->name<<" "<<trans->to->name<<" ("<<trans->get_extra()<<")\n";
+                cout<<"                                                               "<<trans->from->name<<" "<<trans->to->name<<" ("<<trans->GetExtraString()<<")\n";
             }
         }
         cout<<"\n";
