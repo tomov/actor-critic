@@ -26,12 +26,14 @@ public:
     Cue *cue;
     vector<Transition*> in, out;
     StateType type;
+    string extra;
 
     State() :
         name(""),
         reward(0),
         cue(NULL),
-        type(PROBABILISTIC)
+        type(PROBABILISTIC),
+        extra("")
     { }
 };
 
@@ -148,7 +150,7 @@ public:
             State *state = new State();
             string type;
             string cue_name;
-            cin>>state->name>>state->reward>>type>>cue_name;
+            cin>>state->name>>state->reward>>type>>cue_name>>state->extra;
             if (type[0] == 'D' or type[0] == 'd')
             {
                 state->type = DETERMINISTIC;
@@ -240,7 +242,7 @@ public:
         for (int i = 0; i < states.size(); i++)
         {
             State *state = states[i];
-            cout<<"   "<<state->name<<" --> $"<<state->reward<<". Cue: "<<(state->cue ? state->cue->name : "no-cue")<<". Type: "<<(state->type == PROBABILISTIC ? "probabilistic" : "DETERMINISTIC")<<"\n";
+            cout<<"   "<<state->name<<" --> $"<<state->reward<<". Cue: "<<(state->cue ? state->cue->name : "no-cue")<<". Type: "<<(state->type == PROBABILISTIC ? "probabilistic" : "DETERMINISTIC")<<", extra = "<<state->extra<<"\n";
             for (int j = 0; j < state->out.size(); j++)
             {
                 Transition* trans = state->out[j];

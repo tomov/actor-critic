@@ -5,9 +5,9 @@ cue_name    cue_value
 
 N = number of states
 N lines, each line in the format:
-state_name      state_reward      state_type    state_cue
+state_name      state_reward      state_type    state_cue     extra
 
-where state_type = Deterministic or Probabilistic, and state_cue is either a cue_name from the previous list, or a non-existing cue name for non-cue states
+where state_type = Deterministic or Probabilistic, and state_cue is either a cue_name from the previous list, or a non-existing cue name for non-cue states. extra is just a bonus term carrying extra information
 
 the next lines denote the transitions, each in the format:
 from_state      to_state      probability | action_name
