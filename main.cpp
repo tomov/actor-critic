@@ -243,7 +243,7 @@ public:
             }
            
             // move to new state
-            PE_prev_prev = PE_prev;
+            //PE_prev_prev = PE_prev;
             PE_prev = PE;
             S = S_new;
         }
@@ -393,6 +393,23 @@ private:
         // annoying way I could come up with
         Cue *ref_cue = ac->model->cue_from_name[trans->to->extra];
         return GetAveragePE(ref_cue);
+    }
+
+    double GetAveragePEForRewardedTransitionsFrom(State *state)
+    {
+        double PE_avg = 0;
+        int times = 0;
+        for (int i = 0; i < state->out.size(); i++)
+        {
+            Transition* trans = state->out[i];
+            if (trans->to->reward > 0)
+            {
+                PE_avg += ac->transition_extras[trans].PE_avg * ac->transition_extras[trans].times;
+                times += ac->transition_extras[trans].times;
+            }
+        }
+        PE_avg /= times;
+        return PE_avg + bias;
     }
 
 public:
@@ -573,6 +590,36 @@ public:
         PrintFigure<double, double>("4c", 3, 2, 5, "scatter", x, y, "Action value", "PE ~ Dopamine response", "lsline;\nhold on;\nscatter(x_4c(5:end), y_4c(5:end), 'fill', 'blue');\nhold off;\n");
     }
 
+    void Figure4d()
+    {
+        vector<string> x;
+        vector<double> y;
+        // for each decision cue
+        for (int i = 4; i < 14; i++)
+        {
+            Cue* cue = ac->model->cues[i];
+            x.push_back("'" + cue->name + "'");
+            double PE_avg = 0;
+            int times = 0;
+            // for each state
+            for (int j = 0; j < cue->states.size(); j++)
+            {
+                State *state = cue->states[j];
+                // for each action to a reward state
+                for (int k = 0; k < state->out.size(); k++)
+                {
+                    Transition* trans = state->out[k];
+                    // add the PE for actual reward delivery from that reward state
+                    PE_avg += GetAveragePEForRewardedTransitionsFrom(trans->to) * ac->transition_extras[trans].times;
+                    times += ac->transition_extras[trans].times;
+                }
+            }
+            PE_avg /= times;
+            y.push_back(PE_avg);
+        }
+        PrintFigure<string, double>("4d", 3, 2, 2, "bar", x, y, "State (pair)", "PE ~ Dopamine response");
+    }
+
 };
 
 
@@ -585,8 +632,8 @@ int main()
 
     ActorCritic *actor_critic = new ActorCritic(
         model, 
-        /* eta = critic learning rate */ 0.5,
-        /* alpha = actor learning rate */ 0.5,
+        /* eta = critic learning rate */ 0.1,
+        /* alpha = actor learning rate */ 0.1,
         /* gamma = discount factor */ 0.99,
         /* action selection method */ PROBABILITY_MATCHING,
         /* beta = softmax temperature */ 0.01,
@@ -608,6 +655,7 @@ int main()
     morris.Figure4a();
     morris.Figure4b();
     morris.Figure4c();
+    morris.Figure4d();
 
     return 0;
 }
