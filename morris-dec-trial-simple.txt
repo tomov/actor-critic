@@ -17,25 +17,25 @@
 
 19
 
-start              0    probabilistic   no-cue
-decision-trial     0    probabilistic   no-cue
-cue-25-25          0    DETERMINISTIC   25-25
-cue-25-50          0    DETERMINISTIC   25-50
-cue-25-75          0    DETERMINISTIC   25-75
-cue-25-100         0    DETERMINISTIC   25-100
-cue-50-50          0    DETERMINISTIC   50-50
-cue-50-75          0    DETERMINISTIC   50-75
-cue-50-100         0    DETERMINISTIC   50-100
-cue-75-75          0    DETERMINISTIC   75-75
-cue-75-100         0    DETERMINISTIC   75-100
-cue-100-100        0    DETERMINISTIC   100-100
-reward-25          0    probabilistic   no-cue
-reward-50          0    probabilistic   no-cue
-reward-75          0    probabilistic   no-cue
-reward-100         0    probabilistic   no-cue
-get-juice        100    probabilistic   no-cue
-get-no-juice       0    probabilistic   no-cue
-end                0    probabilistic   no-cue
+start              0    probabilistic   no-cue               no-extra
+decision-trial     0    probabilistic   no-cue               no-extra
+cue-25-25          0    DETERMINISTIC   25-25               no-extra
+cue-25-50          0    DETERMINISTIC   25-50               no-extra
+cue-25-75          0    DETERMINISTIC   25-75               no-extra
+cue-25-100         0    DETERMINISTIC   25-100               no-extra
+cue-50-50          0    DETERMINISTIC   50-50               no-extra
+cue-50-75          0    DETERMINISTIC   50-75               no-extra
+cue-50-100         0    DETERMINISTIC   50-100               no-extra
+cue-75-75          0    DETERMINISTIC   75-75               no-extra
+cue-75-100         0    DETERMINISTIC   75-100               no-extra
+cue-100-100        0    DETERMINISTIC   100-100               no-extra
+reward-25          0    probabilistic   no-cue               no-extra
+reward-50          0    probabilistic   no-cue               no-extra
+reward-75          0    probabilistic   no-cue               no-extra
+reward-100         0    probabilistic   no-cue               no-extra
+get-juice        100    probabilistic   no-cue               no-extra
+get-no-juice       0    probabilistic   no-cue               no-extra
+end                0    probabilistic   no-cue               no-extra
 
 
 
