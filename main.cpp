@@ -408,9 +408,51 @@ private:
                 times += ac->transition_extras[trans].times;
             }
         }
+        if (times == 0)
+        {
+            return bias;
+        }
         PE_avg /= times;
         return PE_avg + bias;
     }
+
+    double GetAveragePEForRewardedTransitionsFromChildrenOf(State *state)
+    {
+        double PE_avg = 0;
+        int times = 0;
+        // for each action to a reward state
+        for (int k = 0; k < state->out.size(); k++)
+        {
+            Transition* trans = state->out[k];
+            // add the PE for actual reward delivery from that reward state
+            PE_avg += GetAveragePEForRewardedTransitionsFrom(trans->to) * ac->transition_extras[trans].times;
+            times += ac->transition_extras[trans].times;
+        }
+        assert(times == ac->state_extras[state].times);
+        if (times == 0)
+        {
+            return 0;
+        }
+        PE_avg /= times;
+        return PE_avg;
+    }
+
+    double GetAveragePEForRewardedTransitionsFromChildrenOf(Cue *cue)
+    {
+        double PE_avg;
+        int times = 0;
+        for (int j = 0; j < cue->states.size(); j++)
+        {
+            State *state = cue->states[j];
+            PE_avg += GetAveragePEForRewardedTransitionsFromChildrenOf(state) * ac->state_extras[state].times;
+            times += ac->state_extras[state].times;
+        }
+        assert(times == ac->cue_extras[cue].times);
+        PE_avg /= times;
+        return PE_avg;
+    }
+
+
 
 public:
     Morris(ActorCritic *actor_critic, double dopamine_bias) :
@@ -578,8 +620,8 @@ public:
                     // that corresponds to the same reference cue
                     if (ref_cue == cue)
                     {
-                        PE_avg += ac->transition_extras[trans].PE_avg;
-                        total++;
+                        PE_avg += ac->transition_extras[trans].PE_avg * ac->transition_extras[trans].times;
+                        total += ac->transition_extras[trans].times;
                     }
                 }
             }
@@ -600,23 +642,7 @@ public:
         {
             Cue* cue = ac->model->cues[i];
             x.push_back("'" + cue->name + "'");
-            double PE_avg = 0;
-            int times = 0;
-            // for each state
-            for (int j = 0; j < cue->states.size(); j++)
-            {
-                State *state = cue->states[j];
-                // for each action to a reward state
-                for (int k = 0; k < state->out.size(); k++)
-                {
-                    Transition* trans = state->out[k];
-                    // add the PE for actual reward delivery from that reward state
-                    PE_avg += GetAveragePEForRewardedTransitionsFrom(trans->to) * ac->transition_extras[trans].times;
-                    times += ac->transition_extras[trans].times;
-                }
-            }
-            PE_avg /= times;
-            y.push_back(PE_avg);
+            y.push_back(GetAveragePEForRewardedTransitionsFromChildrenOf(cue));
         }
         PrintFigure<string, double>("4d", 3, 2, 2, "bar", x, y, "State (pair)", "PE ~ Dopamine response");
     }
@@ -649,6 +675,48 @@ public:
             y.push_back(ss.str());
         }
         PrintFigure<string, string>("4e", 3, 2, 4, "bar", x, y, "State (pair)", "PE ~ Dopamine response", "legend('high', 'low');\n");
+    }
+
+    void Figure4f()
+    {
+        vector<double> x, y;
+        // reference trials
+        for (int i = 0; i < 4; i++)
+        {
+            Cue *cue = ac->model->cues[i];
+            x.push_back(ac->cue_extras[cue].reward_avg);
+            y.push_back(GetAveragePEForRewardedTransitionsFromChildrenOf(cue));
+        }
+
+        // decision trials
+        for (int i = 0; i < 4; i++)
+        {
+            Cue *cue = ac->model->cues[i];
+            double PE_avg = 0;
+            int total = 0;
+            for (int j = 0; j < ac->model->transitions.size(); j++)
+            {
+                Transition* trans = ac->model->transitions[j];
+                // if it's an action in a decision trial (i.e. leads to a reward state)
+                if (ac->model->cue_from_name.find(trans->to->extra) != ac->model->cue_from_name.end())
+                {
+                    Cue* ref_cue = ac->model->cue_from_name[trans->to->extra];
+                    // that leads corresponds to the same reference cue
+                    if (ref_cue == cue)
+                    {
+                        // add the PE for actual reward delivery from that reward state  
+                        PE_avg += GetAveragePEForRewardedTransitionsFrom(trans->to) * ac->transition_extras[trans].times;
+                        total += ac->transition_extras[trans].times;
+                    }
+                }
+            }
+            PE_avg /= total;
+            x.push_back(cue->value);
+            y.push_back(PE_avg);
+        }
+
+        PrintFigure<double, double>("4f", 3, 2, 6, "scatter", x, y, "Action value", "PE ~ Dopamine response", "lsline;\nhold on;\nscatter(x_4f(5:end), y_4f(5:end), 'fill', 'blue');\nhold off;\n");
+
     }
 
 };
@@ -688,6 +756,7 @@ int main()
     morris.Figure4c();
     morris.Figure4d();
     morris.Figure4e();
+    morris.Figure4f();
 
     return 0;
 }
