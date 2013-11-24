@@ -529,12 +529,13 @@ public:
         vector<string> y;
         // #hardcoded FIXME
         int cue_ids[] = {5, 7, 8, 9, 11, 12};
+        // for each decision cue with distinct outcomes
         for (int i = 0; i < 6; i++)
         {
             Cue *cue = ac->model->cues[cue_ids[i]];
             x.push_back("'" + cue->name + "'");
             ostringstream ss;
-            // just one...
+            // for each state (just one...)
             for (int j = 0; j < cue->states.size(); j++)
             {
                 State *state = cue->states[j];
@@ -620,6 +621,36 @@ public:
         PrintFigure<string, double>("4d", 3, 2, 2, "bar", x, y, "State (pair)", "PE ~ Dopamine response");
     }
 
+    void Figure4e()
+    {
+        vector<string> x;
+        vector<string> y;
+        // for each decision cue
+        // #hardcoded FIXME
+        int cue_ids[] = {5, 7, 8, 9, 11, 12};
+        for (int i = 0; i < 6; i++)
+        {
+            Cue *cue = ac->model->cues[cue_ids[i]];
+            x.push_back("'" + cue->name + "'");
+            ostringstream ss;
+            // for each state (just one...)
+            for (int j = 0; j < cue->states.size(); j++)
+            {
+                State *state = cue->states[j];
+                // for each action to a reward state
+                for (int k = (int)state->out.size() - 1; k >= 0; k--)
+                {
+                    Transition* trans = state->out[k];
+                    // add the PE for actual reward delivery from that reward state
+                    double PE_avg = GetAveragePEForRewardedTransitionsFrom(trans->to);
+                    ss<<PE_avg<<", ";
+                }
+            }
+            y.push_back(ss.str());
+        }
+        PrintFigure<string, string>("4e", 3, 2, 4, "bar", x, y, "State (pair)", "PE ~ Dopamine response", "legend('high', 'low');\n");
+    }
+
 };
 
 
@@ -656,6 +687,7 @@ int main()
     morris.Figure4b();
     morris.Figure4c();
     morris.Figure4d();
+    morris.Figure4e();
 
     return 0;
 }
