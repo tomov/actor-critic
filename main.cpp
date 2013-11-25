@@ -35,7 +35,9 @@ private:
     struct StateExtra
     {
         int times; // how many times we passed that state
-        StateExtra() : times(0) { }
+        double reward_avg; // average reward received for this state ONLY IF it is a cue state
+        int reward_times; // how many times we passed that state; for cue states only; used for calculating reward_avg
+        StateExtra() : times(0), reward_avg(0), reward_times(0) { }
     };
     map<State*, StateExtra> state_extras;
 
@@ -126,6 +128,34 @@ private:
         }
     }
 
+    void UpdateAveragePE(Transition* trans, double PE)
+    {
+        transition_extras[trans].PE_avg = (transition_extras[trans].PE_avg * transition_extras[trans].times + PE) / (transition_extras[trans].times + 1);
+        transition_extras[trans].times++;
+        state_extras[trans->from].times++;
+        transition_extras[trans].measured_probability = (double)transition_extras[trans].times / state_extras[trans->from].times;
+    }
+
+    void UpdateAverageReward(Cue* cue, double reward)
+    {
+        if (cue == NULL)
+        {
+            return;
+        }
+        cue_extras[cue].reward_avg = (cue_extras[cue].reward_avg * cue_extras[cue].times + reward) / (cue_extras[cue].times + 1);
+        cue_extras[cue].times++;
+    }
+
+    void UpdateAverageReward(State *state, double reward)
+    {
+        if (state == NULL)
+        {
+            return;
+        }
+        state_extras[state].reward_avg = (state_extras[state].reward_avg * state_extras[state].reward_times + reward) / (state_extras[state].reward_times + 1);
+        state_extras[state].reward_times++;
+    }
+
 public:
     friend class Morris;
 
@@ -183,24 +213,6 @@ public:
         Reset();
     }
 
-    void UpdateAveragePE(Transition* trans, double PE)
-    {
-        transition_extras[trans].PE_avg = (transition_extras[trans].PE_avg * transition_extras[trans].times + PE) / (transition_extras[trans].times + 1);
-        transition_extras[trans].times++;
-        state_extras[trans->from].times++;
-        transition_extras[trans].measured_probability = (double)transition_extras[trans].times / state_extras[trans->from].times;
-    }
-
-    void UpdateAverageReward(Cue* cue, double reward)
-    {
-        if (cue == NULL)
-        {
-            return;
-        }
-        cue_extras[cue].reward_avg = (cue_extras[cue].reward_avg * cue_extras[cue].times + reward) / (cue_extras[cue].times + 1);
-        cue_extras[cue].times++;
-    }
-
     void Trial(bool do_print)
     {
         if (do_print) cout<<"\n  ---------------------- TRIAL --------------\n\n";
@@ -208,6 +220,7 @@ public:
         double PE_prev = 0;
         double PE_prev_prev = 0;
         map<Cue*, double> seen_cues;
+        map<State*, double> seen_cue_states; /////// <------------ implement similarly to above!! then fix Figure 2a
         while (S != model->end)
         {
             // pick choice or chance and get new state
@@ -241,7 +254,17 @@ public:
             {
                 it->second += S->reward;
             }
-           
+
+            // bookkeeping -- average reward received per seen cue state (similar to above)
+            if (S->cue != NULL && seen_cue_states.find(S) == seen_cue_states.end())
+            {
+                seen_cue_states[S] = 0;
+            }
+            for (map<State*, double>::iterator it = seen_cue_states.begin(); it != seen_cue_states.end(); it++)
+            {
+                it->second += S->reward;
+            }
+          
             // move to new state
             //PE_prev_prev = PE_prev;
             PE_prev = PE;
@@ -253,6 +276,11 @@ public:
         {
             UpdateAverageReward(it->first, it->second);
         }
+        // same for cue states
+        for (map<State*, double>::iterator it = seen_cue_states.begin(); it != seen_cue_states.end(); it++)
+        {
+            UpdateAverageReward(it->first, it->second);
+        }
     }
 
     void Print()
@@ -261,7 +289,7 @@ public:
         for (int i = 0; i < model->states.size(); i++)
         {
             State *state = model->states[i];
-            cout<<"    V["<<state->name<<"] = "<<V[state]<<", times = "<<state_extras[state].times<<"\n";
+            cout<<"    V["<<state->name<<"] = "<<V[state]<<", times = "<<state_extras[state].times<<", reward_avg = "<<state_extras[state].reward_avg<<", reward times = "<<state_extras[state].reward_times<<"\n";
         }
         cout<<"\n  Transitions:\n";
         for (int i = 0; i < model->transitions.size(); i++)
@@ -469,8 +497,12 @@ public:
             Cue *cue = ac->model->cues[i];
             x.push_back("'" + cue->name + "'");
             ostringstream ss;
-            double obtained_reward = ac->cue_extras[cue].reward_avg;
-            ss<<obtained_reward<<", "<<obtained_reward;
+            for (int j = 0; j < cue->states.size(); j++)
+            {
+                State *state = cue->states[j];
+                double obtained_reward = ac->state_extras[state].reward_avg;
+                ss<<obtained_reward<<", ";
+            }
             y.push_back(ss.str());
         }
         PrintFigure<string, string>("2a", 2, 2, 1, "bar", x, y, "Reward probability", "Obtained reward (R) (%)", "legend('left', 'right');\n");
@@ -480,6 +512,8 @@ public:
     void Figure2b()
     {
         vector<double> x, y;
+        // #hardcoded FIXME which transition is right
+        int right_action_idx = 1;
         // for each decision trial cue (e.g. 50-50, or 50-75, etc)
         // #hardcoded... FIXME
         for (int i = 4; i < 14; i++)
@@ -489,17 +523,15 @@ public:
             for (int j = 0; j < cue->states.size(); j++)
             {
                 State *state = cue->states[j];
-                double R_right = GetAverageReferenceTrialRewardFromDecisionTrialAction(state->out[0]);
+                double R_right = GetAverageReferenceTrialRewardFromDecisionTrialAction(state->out[right_action_idx]);
                 double R_total = 0;
                 for (int k = 0; k < state->out.size(); k++)
                 {
                     R_total += GetAverageReferenceTrialRewardFromDecisionTrialAction(state->out[k]);
                 }
                 x.push_back(R_right / R_total);
-                double C_right = ac->transition_extras[state->out[0]].measured_probability;
+                double C_right = ac->transition_extras[state->out[right_action_idx]].measured_probability;
                 y.push_back(C_right);
-                x.push_back(1.0 - R_right / R_total);
-                y.push_back(1.0 - C_right);
             }
         }
         PrintFigure<double, double>("2b", 2, 2, 3, "scatter", x, y, "R_{right} / (R_{right} + R_{left})", "C_{right}", "axis([0 1 0 1]);\nlsline;\n");
@@ -514,9 +546,13 @@ public:
         {
             Cue *cue = ac->model->cues[i];
             x.push_back("'" + cue->name + "'");
-            double dopamine_response = GetAveragePE(cue);
             ostringstream ss;
-            ss<<dopamine_response<<", "<<dopamine_response;
+            for (int j = 0; j < cue->states.size(); j++)
+            {
+                State* state = cue->states[j];
+                double dopamine_response = GetAveragePE(state);
+                ss<<dopamine_response<<", ";
+            }
             y.push_back(ss.str());
         }
         PrintFigure<string, string>("2c", 2, 2, 2, "bar", x, y, "Reward probability", "PE ~ Dopamine response", "legend('left', 'right');\n");
@@ -526,6 +562,8 @@ public:
     void Figure2d()
     {
         vector<double> x, y;
+        // #hardcoded FIXME which transition is right
+        int right_action_idx = 1;
         // for each decision trial cue (e.g. 50-50, or 50-75, etc)
         // #hardcoded... FIXME
         for (int i = 4; i < 14; i++)
@@ -535,17 +573,15 @@ public:
             for (int j = 0; j < cue->states.size(); j++)
             {
                 State *state = cue->states[j];
-                double D_right = GetAverageReferenceTrialPEFromDecisionTrialAction(state->out[0]);
+                double D_right = GetAverageReferenceTrialPEFromDecisionTrialAction(state->out[right_action_idx]);
                 double D_total = 0;
                 for (int k = 0; k < state->out.size(); k++)
                 {
                     D_total += GetAverageReferenceTrialPEFromDecisionTrialAction(state->out[k]);
                 }
                 x.push_back(D_right / D_total);
-                double C_right = ac->transition_extras[state->out[0]].measured_probability;
+                double C_right = ac->transition_extras[state->out[right_action_idx]].measured_probability;
                 y.push_back(C_right);
-                x.push_back(1.0 - D_right / D_total);
-                y.push_back(1.0 - C_right);
             }
         }
         PrintFigure<double, double>("2d", 2, 2, 4, "scatter", x, y, "D_{right} / (D_{right} + D_{left})", "C_{right}", "axis([0 1 0 1]);\nlsline;\n");
@@ -570,24 +606,40 @@ public:
         vector<string> x;
         vector<string> y;
         // #hardcoded FIXME
+        int left_action_idx = 0;
+        int right_action_idx = 1;
+        // #hardcoded FIXME
         int cue_ids[] = {5, 7, 8, 9, 11, 12};
         // for each decision cue with distinct outcomes
         for (int i = 0; i < 6; i++)
         {
             Cue *cue = ac->model->cues[cue_ids[i]];
             x.push_back("'" + cue->name + "'");
-            ostringstream ss;
-            // for each state (just one...)
+            double high_PE_avg = 0;
+            double low_PE_avg = 0;
             for (int j = 0; j < cue->states.size(); j++)
             {
                 State *state = cue->states[j];
-                for (int k = (int)state->out.size() - 1; k >= 0; k--)
+                // #hardcoded FIXME
+                Transition *trans_left = state->out[left_action_idx];
+                Transition *trans_right = state->out[right_action_idx];
+                Cue *cue_left = ac->model->cue_from_name[trans_left->to->extra];
+                Cue *cue_right = ac->model->cue_from_name[trans_right->to->extra];
+                if (cue_left->value > cue_right->value)
                 {
-                    Transition *trans = state->out[k];
-                    double PE_avg = ac->transition_extras[trans].PE_avg;
-                    ss<<PE_avg + bias<<", ";
+                    high_PE_avg += ac->transition_extras[trans_left].PE_avg;
+                    low_PE_avg += ac->transition_extras[trans_right].PE_avg;
+                }
+                else
+                {
+                    high_PE_avg += ac->transition_extras[trans_right].PE_avg;
+                    low_PE_avg += ac->transition_extras[trans_left].PE_avg;
                 }
             }
+            high_PE_avg /= cue->states.size();
+            low_PE_avg /= cue->states.size();
+            ostringstream ss;
+            ss<<high_PE_avg + bias<<", "<<low_PE_avg + bias;
             y.push_back(ss.str());
         }
         PrintFigure<string, string>("4b", 3, 2, 3, "bar", x, y, "State (pair)", "PE ~ Dopamine response", "legend('high', 'low');\n");
@@ -651,27 +703,42 @@ public:
     {
         vector<string> x;
         vector<string> y;
+        // #hardcoded FIXME
+        int left_action_idx = 0;
+        int right_action_idx = 1;
         // for each decision cue
         // #hardcoded FIXME
         int cue_ids[] = {5, 7, 8, 9, 11, 12};
         for (int i = 0; i < 6; i++)
         {
             Cue *cue = ac->model->cues[cue_ids[i]];
+            double high_PE_avg = 0;
+            double low_PE_avg = 0;
             x.push_back("'" + cue->name + "'");
-            ostringstream ss;
-            // for each state (just one...)
+            // for each state
             for (int j = 0; j < cue->states.size(); j++)
             {
                 State *state = cue->states[j];
-                // for each action to a reward state
-                for (int k = (int)state->out.size() - 1; k >= 0; k--)
+                // #hardcoded FIXME
+                Transition *trans_left = state->out[left_action_idx];
+                Transition *trans_right = state->out[right_action_idx];
+                Cue *cue_left = ac->model->cue_from_name[trans_left->to->extra];
+                Cue *cue_right = ac->model->cue_from_name[trans_right->to->extra];
+                if (cue_left->value > cue_right->value)
                 {
-                    Transition* trans = state->out[k];
-                    // add the PE for actual reward delivery from that reward state
-                    double PE_avg = GetAveragePEForRewardedTransitionsFrom(trans->to);
-                    ss<<PE_avg<<", ";
+                    high_PE_avg += GetAveragePEForRewardedTransitionsFrom(trans_left->to);
+                    low_PE_avg += GetAveragePEForRewardedTransitionsFrom(trans_right->to);
+                }
+                else
+                {
+                    high_PE_avg += GetAveragePEForRewardedTransitionsFrom(trans_right->to); 
+                    low_PE_avg += GetAveragePEForRewardedTransitionsFrom(trans_left->to);
                 }
             }
+            high_PE_avg /= cue->states.size();
+            low_PE_avg /= cue->states.size();
+            ostringstream ss;
+            ss<<high_PE_avg<<", "<<low_PE_avg;
             y.push_back(ss.str());
         }
         PrintFigure<string, string>("4e", 3, 2, 4, "bar", x, y, "State (pair)", "PE ~ Dopamine response", "legend('high', 'low');\n");
@@ -716,7 +783,6 @@ public:
         }
 
         PrintFigure<double, double>("4f", 3, 2, 6, "scatter", x, y, "Action value", "PE ~ Dopamine response", "lsline;\nhold on;\nscatter(x_4f(5:end), y_4f(5:end), 'fill', 'blue');\nhold off;\n");
-
     }
 
 };
