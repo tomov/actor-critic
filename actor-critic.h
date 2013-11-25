@@ -56,7 +56,6 @@ public:
     void Reset()
     {
         RLMethod::Reset();
-        cout<<"calling Actor-Critic :: Reset();\n\n";
         V.clear();
         for (int i = 0; i < model->states.size(); i++)
         {

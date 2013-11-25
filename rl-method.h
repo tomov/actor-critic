@@ -165,7 +165,6 @@ protected:
         policy.clear();
         state_extras.clear();
         cue_extras.clear();
-        cout<<" calling RL Method ::: Reset();\n\n";
         transition_extras.clear();
         H.clear();
         optimal.clear();

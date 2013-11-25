@@ -12,12 +12,12 @@
 #include <utility>
 #include <cassert>
 
-#include "actor-critic.h"
+#include "rl-method.h"
 
 class Morris
 {
 private:
-    ActorCritic *ac;
+    RLMethod *ac;
     double bias;
     
     template<typename X, typename Y>
@@ -181,8 +181,8 @@ private:
 
 
 public:
-    Morris(ActorCritic *actor_critic, double dopamine_bias) :
-        ac(actor_critic),
+    Morris(RLMethod *rl_method, double dopamine_bias) :
+        ac(rl_method),
         bias(dopamine_bias)
     { }
 

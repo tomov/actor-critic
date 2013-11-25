@@ -62,7 +62,6 @@ public:
     void Reset()
     {
         RLMethod::Reset();
-        cout<<" calling SARSA :: Reset();\n\n";
         Q.clear();
         for (int i = 0; i < model->transitions.size(); i++)
         {

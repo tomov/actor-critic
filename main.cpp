@@ -1,4 +1,6 @@
 #include "morris.h"
+#include "actor-critic.h"
+#include "sarsa.h"
 
 int main()
 {
@@ -15,7 +17,7 @@ int main()
     //                Simulate Experiment
     // -------------------------------------------
 
-    ActorCritic *actor_critic = new ActorCritic(
+    RLMethod *rl_method = new SARSA(
         model, 
         /* eta = critic learning rate */ 0.1,
         /* alpha = actor learning rate */ 0.1,
@@ -28,15 +30,15 @@ int main()
 
     for (int i = 0; i < 30000; i++)
     {
-        actor_critic->Trial(/* do_print */ false);
+        rl_method->Trial(/* do_print */ false);
     }
-    actor_critic->Print();
+    rl_method->Print();
 
     // -------------------------------------------
     //                Print Results 
     // -------------------------------------------
 
-    Morris morris(actor_critic, /* dopamine/PE base line */ 75);
+    Morris morris(rl_method, /* dopamine/PE base line */ 75);
     morris.Figure2a();
     morris.Figure2b();
     morris.Figure2c();
