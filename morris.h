@@ -125,6 +125,13 @@ private:
     {
         double PE_avg = 0;
         int times = 0;
+        // FIXME this is a hack -- the reward is delayed (i.e. there are intermediate states,
+        // like reward-25 --> wait --> wait --> wait --> reward-25-real --> juice or no-juice
+        // we keep going until we hit the juice
+        while (state->out.size() == 1)
+        {
+            state = state->out[0]->to;
+        }
         for (int i = 0; i < state->out.size(); i++)
         {
             Transition* trans = state->out[i];
@@ -146,7 +153,7 @@ private:
     {
         double PE_avg = 0;
         int times = 0;
-        // for each action to a reward state
+        // for each action to a reward state (e.g. reward-25)
         for (int k = 0; k < state->out.size(); k++)
         {
             Transition* trans = state->out[k];
