@@ -5,7 +5,7 @@
 
 class SARSA : public RLMethod
 {
-private:
+protected:
     map<Transition*, double> Q;
 
     Choice* GetOptimalChoice(State *state)
@@ -96,7 +96,7 @@ public:
         Reset();
     }
 
-    void Trial(bool do_print)
+    virtual void Trial(bool do_print)
     {
         if (do_print) cout<<"\n  ---------------------- TRIAL --------------\n\n";
         State *S = model->start;

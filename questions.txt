@@ -1,0 +1,3 @@
+What to do with Q-values of non-action transitions? I.e. probabilistic transitions?
+
+Especially in Q-learning?

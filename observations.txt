@@ -2,3 +2,12 @@
 after summing 3 PE's, we get the same results!!!
 
 PE's at the moment of picking the action are the same in decision trials as in reference trials (w/ a small difference because of the average expected reward for a random decision trial vs. a random reference trial -- difference is ~ $6)
+
+
+
+SO some conclusions:
+
+SARSA and ActorCritic give same results if action selection method is PROBABILITY MATCHING
+SARSA gives bad results if method is EPS_GREEDY, although I should try different EPSilon values
+I haven't tried ActorCritic with EPS_Greedy or SOFTMAX
+Q-Learning fails for both EPS_GREEDY and PROBABILITY (unlike SARSA) ==> defs not Q-learning

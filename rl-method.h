@@ -180,6 +180,7 @@ protected:
                 {
                     Choice *choice = dynamic_cast<Choice*>(state->out[j]);
                     policy[choice] = prob_avg;
+                    optimal[state] = choice;
                     H[choice] = 0;
                 }
             }
