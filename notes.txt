@@ -1,0 +1,23 @@
+here -- happen instentaneously
+
+but they don't have to overlap -- drift paper
+
+information itnegratein
+
+
+1) show vanilla model -- it indeed doesn't work
+2) if we add either assumption (or another assumption)
+3) ask the same thing about Q-learning -- can we make Q-learning do that
+
+conclusion: this experiment doesn't tell us if it's not actor critic, or maybe it doesn't tell us anything??
+
+
+show how it works how it doesn't work
+critical assumptions that make it work
+dividing or combining the two PE's
+
+
+Nomoto -- PE's of cue and action -- separate! (animal has to take its time)
+here -- not necessarily => instentaneous
+
+RL Glue -- for RL algos

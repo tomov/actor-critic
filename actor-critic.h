@@ -37,13 +37,19 @@ private:
             {
                 return exp(beta * H[choice]);
             }
-            break;
             case PROBABILITY_MATCHING:
             {
                 State *S_new = choice->to;
-                return max(V[S_new], min_R);
+                return V[S_new];
             }
-            break;
+            case EPS_GREEDY:
+            {
+                if (choice == optimal[choice->from])
+                {
+                    return 1 - eps;
+                }
+                return eps / choice->from->out.size();
+            }
             default:
             {
                 return -1e100;

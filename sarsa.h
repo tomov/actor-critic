@@ -36,12 +36,10 @@ protected:
             {
                 return exp(beta * H[choice]);
             }
-            break;
             case PROBABILITY_MATCHING:
             {
                 return max(Q[choice], min_R);
             }
-            break;
             case EPS_GREEDY:
             {
                 if (choice == optimal[choice->from])
@@ -102,7 +100,7 @@ public:
         State *S = model->start;
         Transition *A = PickTransition(S);
 
-        double PE_prev = 0;
+        double PE_prev = 0, PE_prev_prev = 0;
         map<Cue*, double> seen_cues;
         map<State*, double> seen_cue_states;
         while (S != model->end)
@@ -123,7 +121,7 @@ public:
             if (do_print) cout<<" from "<<S->name<<" to "<<S_new->name<<", PE = "<<PE<<"\n";
 
             // bookkeeping -- average PE per action & prob of chosing this action
-            UpdateAveragePE(A, PE + PE_prev);
+            UpdateAveragePE(A, PE + PE_prev + PE_prev_prev);
 
             // bookkeeping -- average reward received per seen cue
             if (S->cue != NULL && seen_cues.find(S->cue) == seen_cues.end())
@@ -146,6 +144,7 @@ public:
             }
           
             // move to new state
+            PE_prev_prev = PE_prev;
             PE_prev = PE;
             S = S_new;
             A = A_new;
