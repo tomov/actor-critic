@@ -1,5 +1,5 @@
-#ifndef ACTOR_CRITIC_H
-#define ACTOR_CRITIC_H
+#ifndef SARSA_H 
+#define SARSA_H 
 
 #include <iostream>
 #include <cstdio>
@@ -14,27 +14,31 @@
 
 #include "model.h"
 
-enum ActionSelectionMethod
+enum ActionSelectionMethod_SARSA
 {
     SOFTMAX,
-    PROBABILITY_MATCHING
+    PROBABILITY_MATCHING,
+    EPS_GREEDY
 };
 
-class ActorCritic
+class SARSA 
 {
 private:
     ExperimentalModel *model;
     double eta; // critic learning rate
     double alpha; // actor learning rate
     double gamma; // discount factor 
-    ActionSelectionMethod method; // action selection method
+    ActionSelectionMethod_SARSA method; // action selection method
     double beta; // softmax temperature
-    double min_R; // minimum reward for probability matching -- ??? #HACK #hack #FIXME 
+    double min_R; // minimum reward for probability matching -- ??? #HACK #hack #FIXME
     double noise; // in what fraction of the cases will the monkey accidentally press the wrong button)
 
+    double eps; // epsilon for epsilon-greedy action selection
+
     map<Choice*, double> policy;
-    map<State*, double> V;
+    map<Transition*, double> Q;
     map<Choice*, double> H;
+    map<State*, Choice*> optimal;
 
     struct StateExtra
     {
@@ -101,6 +105,26 @@ private:
         return result;
     }
 
+    Choice* GetOptimalChoice(State *state)
+    {
+        if (state->type == PROBABILISTIC)
+        {
+            return NULL;
+        }
+        Transition* result = NULL;
+        double Q_max = -1e100;
+        for (int i = 0; i < state->out.size(); i++)
+        {
+            Transition *trans = state->out[i];
+            if (Q[trans] > Q_max)
+            {
+                result = trans;
+                Q_max = Q[trans];
+            }
+        }
+        return dynamic_cast<Choice*>(result);
+    }
+
     double GetChoiceWeight(Choice *choice)
     {
         switch(method)
@@ -112,10 +136,17 @@ private:
             break;
             case PROBABILITY_MATCHING:
             {
-                State *S_new = choice->to;
-                return max(V[S_new], min_R);
+                return max(Q[choice], min_R);
             }
             break;
+            case EPS_GREEDY:
+            {
+                if (choice == optimal[choice->from])
+                {
+                    return 1 - eps;
+                }
+                return eps / choice->from->out.size();
+            }
             default:
             {
                 return -1e100;
@@ -131,6 +162,7 @@ private:
             return;
         }
         double total = 0;
+        optimal[state] = GetOptimalChoice(state);
         for (int i = 0; i < state->out.size(); i++)
         {
             Choice* choice = dynamic_cast<Choice*>(state->out[i]);
@@ -179,15 +211,16 @@ public:
     void Reset()
     {
         policy.clear();
-        V.clear();
+        Q.clear();
         state_extras.clear();
         cue_extras.clear();
         transition_extras.clear();
         H.clear();
+        optimal.clear();
         for (int i = 0; i < model->states.size(); i++)
         {
             State *state = model->states[i];
-            V[state] = 0;
+            optimal[state] = NULL;
             state_extras[state] = StateExtra();
             if (state->type == DETERMINISTIC)
             {
@@ -212,14 +245,15 @@ public:
         }
     }
 
-    ActorCritic(ExperimentalModel *experiment_model,
+    SARSA(ExperimentalModel *experiment_model,
         double critic_learning_rate,
         double actor_learning_rate,
         double discount_factor,
-        ActionSelectionMethod action_selection_method,
+        ActionSelectionMethod_SARSA action_selection_method,
         double softmax_temperature,
         double minimum_action_reward,
-        double fraction_wrong_button) :
+        double fraction_wrong_button,
+        double epsilon_greedy_constant) :
         model(experiment_model),
         eta(critic_learning_rate),
         alpha(actor_learning_rate),
@@ -227,7 +261,8 @@ public:
         method(action_selection_method),
         beta(softmax_temperature),
         min_R(minimum_action_reward),
-        noise(fraction_wrong_button)
+        noise(fraction_wrong_button),
+        eps(epsilon_greedy_constant)
     {
         Reset();
     }
@@ -235,34 +270,31 @@ public:
     void Trial(bool do_print)
     {
         if (do_print) cout<<"\n  ---------------------- TRIAL --------------\n\n";
-        State* S = model->start;
+        State *S = model->start;
+        Transition *A = PickTransition(S);
+
         double PE_prev = 0;
         map<Cue*, double> seen_cues;
         map<State*, double> seen_cue_states;
         while (S != model->end)
         {
-            // pick choice or chance and get new state
-            Transition* a = PickTransition(S);
+            State *S_new = A->to;
+            Transition *A_new = PickTransition(S_new);
 
-            // calculate prediciton error
-            State *S_new = a->to;
             double R_new = S_new->reward;
-            double PE = R_new + gamma * V[S_new] - V[S];
-
-            // update state value
-            V[S] += eta * PE;
+            double PE = R_new + gamma * Q[A_new] - Q[A];
+            Q[A] += eta * PE;
 
             // update policy
             if (S->type == DETERMINISTIC)
             {
-                H[dynamic_cast<Choice*>(a)] += alpha * PE;
+                H[dynamic_cast<Choice*>(A)] += alpha * PE;
             }
             UpdatePolicy(S);
             if (do_print) cout<<" from "<<S->name<<" to "<<S_new->name<<", PE = "<<PE<<"\n";
 
             // bookkeeping -- average PE per action & prob of chosing this action
-            UpdateAveragePE(a, PE + PE_prev);
-
+            UpdateAveragePE(A, PE + PE_prev);
 
             // bookkeeping -- average reward received per seen cue
             if (S->cue != NULL && seen_cues.find(S->cue) == seen_cues.end())
@@ -287,6 +319,7 @@ public:
             // move to new state
             PE_prev = PE;
             S = S_new;
+            A = A_new;
         }
         // bookkeeping -- update the average reward for all cues passed on this trial
         for (map<Cue*, double>::iterator it = seen_cues.begin(); it != seen_cues.end(); it++)
@@ -306,13 +339,13 @@ public:
         for (int i = 0; i < model->states.size(); i++)
         {
             State *state = model->states[i];
-            cout<<"    V["<<state->name<<"] = "<<V[state]<<", times = "<<state_extras[state].times<<", reward_avg = "<<state_extras[state].reward_avg<<", reward times = "<<state_extras[state].reward_times<<"\n";
+            cout<<"    optimal["<<state->name<<"] = "<<(optimal[state] ? optimal[state]->name : "None")<<", times = "<<state_extras[state].times<<", reward_avg = "<<state_extras[state].reward_avg<<", reward times = "<<state_extras[state].reward_times<<"\n";
         }
         cout<<"\n  Transitions:\n";
         for (int i = 0; i < model->transitions.size(); i++)
         {
             Transition *trans = model->transitions[i];
-            cout<<"     "<<trans->from->name<<" -> "<<trans->to->name<<": ";
+            cout<<"     Q["<<trans->from->name<<" -> "<<trans->to->name<<"] = "<<Q[trans]<<": ";
             if (trans->from->type == DETERMINISTIC)
             {
                 Choice *choice = dynamic_cast<Choice*>(trans);

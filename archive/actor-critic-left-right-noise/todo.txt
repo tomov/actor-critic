@@ -1,0 +1,5 @@
+separate reward states
+
+get confidence bars (std err?)
+
+SARSA

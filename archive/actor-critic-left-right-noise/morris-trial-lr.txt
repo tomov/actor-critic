@@ -1,0 +1,154 @@
+14
+
+25        25
+50        50
+75        75
+100       100
+25-25     25
+50-25     37.5
+50-50     50
+75-25     50
+75-50     62.5
+100-25    62.5
+75-75     75
+100-50    75
+100-75    87.5
+100-100   100
+
+34
+
+start              0    probabilistic   no-cue       no-extra
+reference-trial    0    probabilistic   no-cue       no-extra
+decision-trial     0    probabilistic   no-cue       no-extra
+
+cue-25-L           0    DETERMINISTIC   25           no-extra
+cue-50-L           0    DETERMINISTIC   50           no-extra
+cue-75-L           0    DETERMINISTIC   75           no-extra
+cue-100-L          0    DETERMINISTIC   100          no-extra
+cue-25-R           0    DETERMINISTIC   25           no-extra
+cue-50-R           0    DETERMINISTIC   50           no-extra
+cue-75-R           0    DETERMINISTIC   75           no-extra
+cue-100-R          0    DETERMINISTIC   100          no-extra
+
+
+cue-25-25          0    DETERMINISTIC   25-25        no-extra
+cue-25-50          0    DETERMINISTIC   50-25        no-extra
+cue-25-75          0    DETERMINISTIC   75-25        no-extra
+cue-25-100         0    DETERMINISTIC   100-25       no-extra
+cue-50-25          0    DETERMINISTIC   50-25        no-extra
+cue-50-50          0    DETERMINISTIC   50-50        no-extra
+cue-50-75          0    DETERMINISTIC   75-50        no-extra
+cue-50-100         0    DETERMINISTIC   100-50       no-extra
+cue-75-25          0    DETERMINISTIC   75-25        no-extra
+cue-75-50          0    DETERMINISTIC   75-50        no-extra
+cue-75-75          0    DETERMINISTIC   75-75        no-extra
+cue-75-100         0    DETERMINISTIC   100-75       no-extra
+cue-100-25         0    DETERMINISTIC   100-25       no-extra
+cue-100-50         0    DETERMINISTIC   100-50       no-extra
+cue-100-75         0    DETERMINISTIC   100-75       no-extra
+cue-100-100        0    DETERMINISTIC   100-100      no-extra
+
+reward-25          0    probabilistic   no-cue       25
+reward-50          0    probabilistic   no-cue       50
+reward-75          0    probabilistic   no-cue       75
+reward-100         0    probabilistic   no-cue       100
+get-juice        100    probabilistic   no-cue       no-extra
+get-no-juice       0    probabilistic   no-cue       no-extra
+end                0    probabilistic   no-cue       no-extra
+
+
+
+
+
+start              reference-trial      0.9
+start              decision-trial       0.1
+
+reference-trial    cue-25-L               0.125
+reference-trial    cue-50-L               0.125
+reference-trial    cue-75-L               0.125
+reference-trial    cue-100-L              0.125
+reference-trial    cue-25-R               0.125
+reference-trial    cue-50-R               0.125
+reference-trial    cue-75-R               0.125
+reference-trial    cue-100-R              0.125
+
+
+cue-25-L           reward-25            left
+cue-25-L           end                  right 
+cue-50-L           reward-50            left 
+cue-50-L           end                  right 
+cue-75-L           reward-75            left 
+cue-75-L           end                  right 
+cue-100-L          reward-100           left 
+cue-100-L          end                  right 
+cue-25-R           end                  left 
+cue-25-R           reward-25            right
+cue-50-R           end                  left 
+cue-50-R           reward-50            right 
+cue-75-R           end                  left 
+cue-75-R           reward-75            right 
+cue-100-R          end                  left 
+cue-100-R          reward-100           right 
+
+
+decision-trial     cue-25-25            0.0625
+decision-trial     cue-25-50            0.0625
+decision-trial     cue-25-75            0.0625
+decision-trial     cue-25-100           0.0625
+decision-trial     cue-50-25            0.0625
+decision-trial     cue-50-50            0.0625
+decision-trial     cue-50-75            0.0625
+decision-trial     cue-50-100           0.0625
+decision-trial     cue-75-25            0.0625
+decision-trial     cue-75-50            0.0625
+decision-trial     cue-75-75            0.0625
+decision-trial     cue-75-100           0.0625
+decision-trial     cue-100-25           0.0625
+decision-trial     cue-100-50           0.0625
+decision-trial     cue-100-75           0.0625
+decision-trial     cue-100-100          0.0625
+
+cue-25-25          reward-25            left
+cue-25-25          reward-25            right
+cue-25-50          reward-25            left
+cue-25-50          reward-50            right
+cue-25-75          reward-25            left
+cue-25-75          reward-75            right
+cue-25-100         reward-25            left
+cue-25-100         reward-100           right
+cue-50-25          reward-50            left
+cue-50-25          reward-25            right
+cue-50-50          reward-50            left
+cue-50-50          reward-50            right
+cue-50-75          reward-50            left
+cue-50-75          reward-75            right
+cue-50-100         reward-50            left
+cue-50-100         reward-100           right
+cue-75-25          reward-75            left
+cue-75-25          reward-25            right
+cue-75-50          reward-75            left
+cue-75-50          reward-50            right
+cue-75-75          reward-75            left
+cue-75-75          reward-75            right
+cue-75-100         reward-75            left
+cue-75-100         reward-100           right
+cue-100-25         reward-100           left
+cue-100-25         reward-25            right
+cue-100-50         reward-100           left
+cue-100-50         reward-50            right
+cue-100-75         reward-100           left
+cue-100-75         reward-75            right
+cue-100-100        reward-100           left
+cue-100-100        reward-100           right
+
+reward-25          get-juice            0.25
+reward-25          get-no-juice         0.75
+reward-50          get-juice            0.5
+reward-50          get-no-juice         0.5
+reward-75          get-juice            0.75
+reward-75          get-no-juice         0.25
+reward-100         get-juice            1
+reward-100         get-no-juice         0
+get-juice          end                  1
+get-no-juice       end                  1
+

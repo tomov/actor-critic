@@ -1,0 +1,4 @@
+
+after summing 3 PE's, we get the same results!!!
+
+PE's at the moment of picking the action are the same in decision trials as in reference trials (w/ a small difference because of the average expected reward for a random decision trial vs. a random reference trial -- difference is ~ $6)

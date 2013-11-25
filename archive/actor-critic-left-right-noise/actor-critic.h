@@ -67,7 +67,6 @@ private:
     {
         double r = (double)rand() / RAND_MAX;
         double tot = 0;
-        Transition* result = NULL;
         for (int i = 0; i < state->out.size(); i++)
         {
             Transition *trans = state->out[i];
@@ -83,22 +82,10 @@ private:
             }
             if (tot >= r)
             {
-                result = trans;
-                break;
+                return trans;
             }
         }
-
-        // noise -- press wrong button sometimes
-        if (state->type == DETERMINISTIC)
-        {
-            double r = (double)rand() / RAND_MAX;
-            if (r < noise)
-            {
-                int trans_idx = rand() % state->out.size();
-                result = state->out[trans_idx];
-            }
-        }
-        return result;
+        return NULL;
     }
 
     double GetChoiceWeight(Choice *choice)
@@ -237,12 +224,24 @@ public:
         if (do_print) cout<<"\n  ---------------------- TRIAL --------------\n\n";
         State* S = model->start;
         double PE_prev = 0;
+        double PE_prev_prev = 0;
         map<Cue*, double> seen_cues;
         map<State*, double> seen_cue_states;
         while (S != model->end)
         {
             // pick choice or chance and get new state
             Transition* a = PickTransition(S);
+
+            // noise
+            if (S->type == DETERMINISTIC)
+            {
+                double r = (double)rand() / RAND_MAX;
+                if (r < noise)
+                {
+                    int a_idx = rand() % S->out.size();
+                    a = S->out[a_idx];
+                }
+            }
 
             // calculate prediciton error
             State *S_new = a->to;
@@ -261,8 +260,7 @@ public:
             if (do_print) cout<<" from "<<S->name<<" to "<<S_new->name<<", PE = "<<PE<<"\n";
 
             // bookkeeping -- average PE per action & prob of chosing this action
-            UpdateAveragePE(a, PE + PE_prev);
-
+            UpdateAveragePE(a, PE + PE_prev + PE_prev_prev);
 
             // bookkeeping -- average reward received per seen cue
             if (S->cue != NULL && seen_cues.find(S->cue) == seen_cues.end())
@@ -285,6 +283,7 @@ public:
             }
           
             // move to new state
+            //PE_prev_prev = PE_prev;
             PE_prev = PE;
             S = S_new;
         }
