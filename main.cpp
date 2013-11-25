@@ -27,6 +27,7 @@ private:
     ActionSelectionMethod method; // action selection method
     double beta; // softmax temperature
     double min_R; // minimum reward for probability matching -- ??? #HACK #hack #FIXME 
+    double noise; // in what fraction of the cases will the monkey accidentally press the wrong button)
 
     map<Choice*, double> policy;
     map<State*, double> V;
@@ -201,14 +202,16 @@ public:
         double discount_factor,
         ActionSelectionMethod action_selection_method,
         double softmax_temperature,
-        double minimum_action_reward) :
+        double minimum_action_reward,
+        double fraction_wrong_button) :
         model(experiment_model),
         eta(critic_learning_rate),
         alpha(actor_learning_rate),
         gamma(discount_factor),
         method(action_selection_method),
         beta(softmax_temperature),
-        min_R(minimum_action_reward)
+        min_R(minimum_action_reward),
+        noise(fraction_wrong_button)
     {
         Reset();
     }
@@ -225,6 +228,18 @@ public:
         {
             // pick choice or chance and get new state
             Transition* a = PickTransition(S);
+
+            if (S->type == DETERMINISTIC)
+            {
+                // noise
+                double r = (double)rand() / RAND_MAX;
+                if (r < noise)
+                {
+                    int a_idx = rand() % S->out.size();
+                    a = S->out[a_idx];
+                }
+            }
+
             State *S_new = a->to;
             double R_new = S_new->reward;
 
@@ -781,7 +796,6 @@ public:
             x.push_back(cue->value);
             y.push_back(PE_avg);
         }
-
         PrintFigure<double, double>("4f", 3, 2, 6, "scatter", x, y, "Action value", "PE ~ Dopamine response", "lsline;\nhold on;\nscatter(x_4f(5:end), y_4f(5:end), 'fill', 'blue');\nhold off;\n");
     }
 
@@ -802,7 +816,8 @@ int main()
         /* gamma = discount factor */ 0.99,
         /* action selection method */ PROBABILITY_MATCHING,
         /* beta = softmax temperature */ 0.01,
-        /* min_R = minimum action reward */ 1);
+        /* min_R = minimum action reward */ 1,
+        /* noise = fraction of wrong button presses */ 0.1);
 
     for (int i = 0; i < 30000; i++)
     {

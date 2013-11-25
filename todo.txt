@@ -1,5 +1,3 @@
-have separate left-right
-
 add noise
 
 separate reward states
