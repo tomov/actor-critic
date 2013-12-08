@@ -91,7 +91,7 @@ protected:
         }
 
         // noise -- press wrong button sometimes
-        if (state->type == DETERMINISTIC)
+        /*if (state->type == DETERMINISTIC)
         {
             double r = (double)rand() / RAND_MAX;
             if (r < noise)
@@ -99,7 +99,7 @@ protected:
                 int trans_idx = rand() % state->out.size();
                 result = state->out[trans_idx];
             }
-        }
+        }*/
         return result;
     }
 

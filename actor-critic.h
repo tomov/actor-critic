@@ -40,7 +40,7 @@ private:
             case PROBABILITY_MATCHING:
             {
                 State *S_new = choice->to;
-                return V[S_new];
+                return max(V[S_new], min_R);
             }
             case EPS_GREEDY:
             {
@@ -126,7 +126,6 @@ public:
 
             // bookkeeping -- average PE per action & prob of chosing this action
             UpdateAveragePE(a, PE + PE_prev);
-
 
             // bookkeeping -- average reward received per seen cue
             if (S->cue != NULL && seen_cues.find(S->cue) == seen_cues.end())

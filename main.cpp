@@ -10,7 +10,7 @@ int main()
     // -------------------------------------------
 
     ExperimentalModel *model = new ExperimentalModel();
-
+    
     model->Read();
     model->Print();
 
@@ -18,14 +18,14 @@ int main()
     //                Simulate Experiment
     // -------------------------------------------
 
-    RLMethod *rl_method = new SARSA(
+    RLMethod *rl_method = new ActorCritic(
         model, 
         /* eta = critic learning rate */ 0.01,
         /* alpha = actor learning rate */ 0.01,
         /* gamma = discount factor */ 0.99,
-        /* action selection method */ SOFTMAX,
+        /* action selection method */ PROBABILITY_MATCHING,
         /* beta = softmax temperature */ 0.01,
-        /* min_R = minimum action reward */ 1,
+        /* min_R = minimum action reward */ 1e-10,
         /* noise = fraction of wrong button presses */ 0.1,
         /* eps = epsilon constant for eps-greedy action selection */ 0.01);
 
