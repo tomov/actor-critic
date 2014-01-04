@@ -24,7 +24,7 @@ int main()
         /* alpha = actor learning rate */ 0.005,
         /* gamma = discount factor */ 1, // clean = 1, real = 0.99
         /* action selection method */ SOFTMAX,
-        /* beta = softmax temperature */ 0.005,
+        /* beta = softmax temperature */ 0.01,
         /* min_R = minimum action reward */ 0.1,
         /* noise = fraction of wrong button presses */ 0, // clean = 0, real = 0.1
         /* eps = epsilon constant for eps-greedy action selection */ 0.01);
