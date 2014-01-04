@@ -121,7 +121,10 @@ public:
             if (do_print) cout<<" from "<<S->name<<" to "<<S_new->name<<", PE = "<<PE<<"\n";
 
             // bookkeeping -- average PE per action & prob of chosing this action
-            UpdateAveragePE(A, PE + PE_prev + PE_prev_prev);
+            if (A_new)
+            {
+                UpdateAveragePE(A_new, PE + PE_prev + PE_prev_prev);
+            }
 
             // bookkeeping -- average reward received per seen cue
             if (S->cue != NULL && seen_cues.find(S->cue) == seen_cues.end())
@@ -144,8 +147,8 @@ public:
             }
           
             // move to new state
-            PE_prev_prev = PE_prev;
-            PE_prev = PE;
+            //PE_prev_prev = PE_prev;
+            //PE_prev = PE;
             S = S_new;
             A = A_new;
         }

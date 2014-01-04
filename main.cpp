@@ -21,15 +21,15 @@ int main()
     RLMethod *rl_method = new ActorCritic(
         model, 
         /* eta = critic learning rate */ 0.01,
-        /* alpha = actor learning rate */ 0.01,
-        /* gamma = discount factor */ 0.99,
-        /* action selection method */ PROBABILITY_MATCHING,
-        /* beta = softmax temperature */ 0.01,
-        /* min_R = minimum action reward */ 1e-10,
-        /* noise = fraction of wrong button presses */ 0.1,
+        /* alpha = actor learning rate */ 0.005,
+        /* gamma = discount factor */ 1, // clean = 1, real = 0.99
+        /* action selection method */ SOFTMAX,
+        /* beta = softmax temperature */ 0.005,
+        /* min_R = minimum action reward */ 0.1,
+        /* noise = fraction of wrong button presses */ 0, // clean = 0, real = 0.1
         /* eps = epsilon constant for eps-greedy action selection */ 0.01);
 
-    for (int i = 0; i < 30000; i++)
+    for (int i = 0; i < 300000; i++)
     {
         rl_method->Trial(/* do_print */ false);
     }

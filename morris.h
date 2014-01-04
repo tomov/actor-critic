@@ -11,6 +11,7 @@
 #include <cmath>
 #include <utility>
 #include <cassert>
+#include <set>
 
 #include "rl-method.h"
 
@@ -340,6 +341,10 @@ public:
                     high_PE_avg += ac->transition_extras[trans_right].PE_avg;
                     low_PE_avg += ac->transition_extras[trans_left].PE_avg;
                 }
+                // !!!!!!!!!!!!!!!!!!!!!!!!!
+                /*trans_left = state->in[0]; trans_right = state->in[0];
+                high_PE_avg += ac->transition_extras[trans_left].PE_avg;
+                low_PE_avg += ac->transition_extras[trans_right].PE_avg;*/
             }
             high_PE_avg /= cue->states.size();
             low_PE_avg /= cue->states.size();
@@ -352,11 +357,13 @@ public:
 
     void Figure4c()
     {
+        set<Cue*> ref_cues;
         vector<double> x, y;
         // reference trials
         for (int i = 0; i < 4; i++)
         {
             Cue *cue = ac->model->cues[i];
+            ref_cues.insert(cue);
             x.push_back(ac->cue_extras[cue].reward_avg);
             y.push_back(GetAveragePE(cue));
         }
@@ -371,12 +378,13 @@ public:
             {
                 Transition* trans = ac->model->transitions[j];
                 // if it's an action in a decision trial
-                if (ac->model->cue_from_name.find(trans->to->extra) != ac->model->cue_from_name.end())
+                if (ac->model->cue_from_name.find(trans->to->extra) != ac->model->cue_from_name.end() && ref_cues.find(trans->from->cue) == ref_cues.end())
                 {
                     Cue* ref_cue = ac->model->cue_from_name[trans->to->extra];
                     // that corresponds to the same reference cue
                     if (ref_cue == cue)
                     {
+                        //trans = trans->from->in[0]; // !!!!!!!!!!!!!!!!
                         PE_avg += ac->transition_extras[trans].PE_avg * ac->transition_extras[trans].times;
                         total += ac->transition_extras[trans].times;
                     }

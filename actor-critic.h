@@ -181,7 +181,8 @@ public:
                 Choice *choice = dynamic_cast<Choice*>(trans);
                 cout<<"         ("<<choice->name<<")               policy = "<<policy[choice]<<", H = "<<H[choice];
             }
-            cout<<", PE_avg = "<<transition_extras[trans].PE_avg<<", times = "<<transition_extras[trans].times<<", measured prob = "<<transition_extras[trans].measured_probability;
+            double prob = (double)transition_extras[trans].times / state_extras[trans->from].times;
+            cout<<", PE_avg = "<<transition_extras[trans].PE_avg<<", times = "<<transition_extras[trans].times<<", measured prob = "<<prob<<" ("<<state_extras[trans->from].times<<")";
             cout<<"\n";
         }
         cout<<"\n  Cue\n";
