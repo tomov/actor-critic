@@ -1,6 +1,8 @@
 #ifndef ACTOR_CRITIC_H
 #define ACTOR_CRITIC_H
 
+#define DA_STANDARD
+
 #include "rl-method.h"
 
 class ActorCritic : public RLMethod
@@ -125,7 +127,21 @@ public:
             if (do_print) cout<<" from "<<S->name<<" to "<<S_new->name<<", PE = "<<PE<<"\n";
 
             // bookkeeping -- average PE per action & prob of chosing this action
+            /* standard interpretation */
+            // this is a hack to make the plotting form the extended DA version work with the standard one
+#ifdef DA_STANDARD
+            if (S->cue == NULL) // go state
+            {
+                UpdateAveragePE(a, PE);
+            }
+            else // cue state
+            {
+                UpdateAveragePE(a, PE_prev);
+            }
+#else
+            /* extended interpretation */
             UpdateAveragePE(a, PE + PE_prev);
+#endif
 
             // bookkeeping -- average reward received per seen cue
             if (S->cue != NULL && seen_cues.find(S->cue) == seen_cues.end())

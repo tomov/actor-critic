@@ -52,5 +52,8 @@ int main()
     morris.Figure4e();
     morris.Figure4f();
 
+    printf("set(findall(gcf,'type','text'),'fontSize',14);\n");
+    printf("print(gcf,'-depsc','/Users/tomov90/Desktop/res-3-f.eps');\n");
+
     return 0;
 }

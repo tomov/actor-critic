@@ -395,7 +395,7 @@ public:
             y.push_back(PE_avg + bias);
         }
 
-        PrintFigure<double, double>("4c", 3, 2, 5, "scatter", x, y, "Action value", "PE ~ Dopamine response", "lsline;\nhold on;\nscatter(x_4c(5:end), y_4c(5:end), 'fill', 'blue');\nhold off;\n");
+        PrintFigure<double, double>("4c", 3, 2, 5, "h1 = scatter", x, y, "Action value", "PE ~ Dopamine response", "lsline;\nhold on;\nh2 = scatter(x_4c(5:end), y_4c(5:end), 'fill', 'blue');\nhold off;\nlegend([h1, h2], 'Reference trials', 'Decision trials');\n");
     }
 
     void Figure4d()
@@ -494,7 +494,7 @@ public:
             x.push_back(cue->value);
             y.push_back(PE_avg);
         }
-        PrintFigure<double, double>("4f", 3, 2, 6, "scatter", x, y, "Action value", "PE ~ Dopamine response", "lsline;\nhold on;\nscatter(x_4f(5:end), y_4f(5:end), 'fill', 'blue');\nhold off;\n");
+        PrintFigure<double, double>("4f", 3, 2, 6, "h1 = scatter", x, y, "Action value", "PE ~ Dopamine response", "lsline;\nhold on;\nh2 = scatter(x_4f(5:end), y_4f(5:end), 'fill', 'blue');\nhold off;\nlegend([h1, h2], 'Reference trials', 'Decision trials');\n");
     }
 
 };
