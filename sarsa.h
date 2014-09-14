@@ -113,9 +113,9 @@ public:
             Q[A] += eta * PE;
 
             // update policy
-            if (S->type == DETERMINISTIC)
+            if (S_new->type == DETERMINISTIC)
             {
-                H[dynamic_cast<Choice*>(A)] += alpha * PE;
+                H[dynamic_cast<Choice*>(A_new)] += alpha * PE;
             }
             UpdatePolicy(S);
             if (do_print) cout<<" from "<<S->name<<" to "<<S_new->name<<", PE = "<<PE<<"\n";

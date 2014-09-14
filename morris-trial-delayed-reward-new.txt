@@ -15,7 +15,9 @@
 100-75    87.5
 100-100   100
 
-36
+37
+
+pre-start          0    probabilistic   no-cue       no-extra
 
 start              0    probabilistic   no-cue       no-extra
 
@@ -61,6 +63,7 @@ end                0    probabilistic   no-cue       no-extra
 
 
 
+pre-start start                 1
 
 start    cue-25-L               0.1125
 start    cue-50-L               0.1125
