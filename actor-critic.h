@@ -124,7 +124,7 @@ public:
                 H[dynamic_cast<Choice*>(a)] += alpha * PE;
             }
             UpdatePolicy(S);
-            if (do_print) cout<<" from "<<S->name<<" to "<<S_new->name<<", PE = "<<PE<<"\n";
+            if (do_print) cout<<" from "<<S->name<<" (V="<<V[S]<<") to "<<S_new->name<<" (V="<<V[S_new]<<"), PE = "<<PE<<"\n";
 
             // bookkeeping -- average PE per action & prob of chosing this action
             /* standard interpretation */

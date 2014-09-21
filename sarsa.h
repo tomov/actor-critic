@@ -34,7 +34,7 @@ protected:
         {
             case SOFTMAX:
             {
-                return exp(beta * H[choice]);
+                return exp(beta * Q[choice]);
             }
             case PROBABILITY_MATCHING:
             {
@@ -113,12 +113,16 @@ public:
             Q[A] += eta * PE;
 
             // update policy
+            // TODO investigate why the fuck this has to be _new in order to work as A/C
+            // not that we need it anyway
+            /*
             if (S_new->type == DETERMINISTIC)
             {
                 H[dynamic_cast<Choice*>(A_new)] += alpha * PE;
             }
+            */
             UpdatePolicy(S);
-            if (do_print) cout<<" from "<<S->name<<" to "<<S_new->name<<", PE = "<<PE<<"\n";
+            if (do_print) cout<<" from "<<S->name<<" (Q="<<Q[A]<<") to "<<S_new->name<<" (Q="<<Q[A_new]<<"), PE = "<<PE<<"\n";
 
             // bookkeeping -- average PE per action & prob of chosing this action
             if (A_new)

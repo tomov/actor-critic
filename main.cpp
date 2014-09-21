@@ -18,7 +18,7 @@ int main()
     //                Simulate Experiment
     // -------------------------------------------
 
-    RLMethod *rl_method = new ActorCritic(
+    RLMethod *rl_method = new SARSA(
         model, 
         /* eta = critic learning rate */ 0.01,
         /* alpha = actor learning rate */ 0.005,

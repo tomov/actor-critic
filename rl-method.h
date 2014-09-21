@@ -138,6 +138,7 @@ protected:
         transition_extras[trans].times++;
         state_extras[trans->from].times++;
         transition_extras[trans].measured_probability = (double)transition_extras[trans].times / state_extras[trans->from].times;
+        transition_extras[trans].PE_avg = PE; // temporary hack -- average in fact shows the last one only 
     }
 
     void UpdateAverageReward(Cue* cue, double reward)
